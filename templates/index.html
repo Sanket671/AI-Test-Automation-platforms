@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AI Test Automation Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 16px; }
+    textarea { width: 100%; min-height: 180px; padding: 10px; }
+    select, button { padding: 10px; margin: 8px 0; }
+    pre { background: #f4f4f4; padding: 12px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>AI-Powered Test Automation Platform</h1>
+  <p>Enter a workflow or OpenAPI YAML. The service generates test cases and artifacts for Newman/Cypress.</p>
+  <label>Input type</label>
+  <select id="source">
+    <option value="workflow">Workflow description</option>
+    <option value="openapi">OpenAPI YAML</option>
+  </select>
+  <textarea id="input" placeholder="Example: Test GET /users. Verify 200. Also create a user and verify 201."></textarea>
+  <button onclick="generate()">Generate tests</button>
+  <h2>Result</h2>
+  <pre id="result">Nothing generated yet.</pre>
+<script>
+async function generate() {
+  const source = document.getElementById('source').value;
+  const input = document.getElementById('input').value;
+  const res = await fetch('/api/generate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({source, input})
+  });
+  const data = await res.json();
+  document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+}
+</script>
+</body>
+</html>

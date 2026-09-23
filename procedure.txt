@@ -1,0 +1,31 @@
+Terminal 1 :
+
+    python -m venv .venv
+    .venv\Scripts\activate
+    pip install -r requirements.txt
+    python app.py
+
+    Platform UI: http://127.0.0.1:5000
+    Health: http://127.0.0.1:5000/api/health
+
+Terminal 2 :
+
+    python sample_api.py
+
+    Sample API: http://127.0.0.1:5001
+
+Terminal 3 :
+
+    npm install
+    npx newman run collections/demo.collection.json \
+    --env-var baseUrl=http://127.0.0.1:5001 \
+    --reporters cli,json \
+    --reporter-json-export reports/newman-report.json
+
+    type nul > cypress\support\e2e.js (Run only once)
+
+    npx cypress run
+
+Terminal 4 :
+
+python -c "from pathlib import Path; from generator.openapi_generator import generate_from_openapi; import json; print(json.dumps(generate_from_openapi(Path('specs/openapi.yaml').read_text()), indent=2))"
