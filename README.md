@@ -6,6 +6,8 @@ Demo Video - https://drive.google.com/file/d/13OySHVM7Yul6-5ibRZxNn-xMZLn-vtAj/v
 
 Architecture Image - https://drive.google.com/file/d/15RMU4IgoKvIi8UgC0AO40NH-uRlYJNiC/view?usp=drivesdk
 
+Beginner Friendly Documentation - https://docs.google.com/document/d/1sZhJk7X9zVonH9cFXaHnSp3AggcIhpYh/edit?usp=drivesdk&ouid=116178795621477601951&rtpof=true&sd=true
+
 ## Table of Contents
 
 - [AI Test Automation Platform V2](#ai-test-automation-platform-v2)
