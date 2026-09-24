@@ -2,7 +2,9 @@
 
 An AI-assisted API test automation platform that takes an **OpenAPI specification**, automatically generates API test cases, validates and executes them, generates additional test scenarios using **Google Gemini**, and exposes the complete workflow through a **Flask backend and React dashboard**.
 
+Demo Video - https://drive.google.com/file/d/13OySHVM7Yul6-5ibRZxNn-xMZLn-vtAj/view?usp=drivesdk
 
+Architecture Image - https://drive.google.com/file/d/15RMU4IgoKvIi8UgC0AO40NH-uRlYJNiC/view?usp=drivesdk
 
 ## Table of Contents
 
