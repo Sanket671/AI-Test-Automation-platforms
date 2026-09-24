@@ -1,70 +1,108 @@
-from __future__ import annotations
-
-import json
-import os
+from flask import Flask, jsonify
+from flask_cors import CORS
 from pathlib import Path
-from flask import Flask, jsonify, render_template, request
+import json
 
-from generator.ai_generator import generate_from_workflow
 from generator.openapi_generator import generate_from_openapi
-from generator.postman import build_postman_collection
-from generator.cypress import build_cypress_spec
-
-BASE_DIR = Path(__file__).resolve().parent
-OUTPUT_DIR = BASE_DIR / "reports"
-OUTPUT_DIR.mkdir(exist_ok=True)
+from generator.validator import validate_test_cases
+from generator.executor import execute_test
 
 app = Flask(__name__)
+CORS(app)
 
-
-@app.get("/")
-def index():
-    return render_template("index.html")
+OPENAPI_FILE = Path("specs/openapi.yaml")
+AI_TEST_FILE = Path("reports/ai-generated-tests.json")
 
 
 @app.get("/api/health")
 def health():
-    return jsonify({"status": "ok", "service": "test-automation-platform"})
+    return jsonify({"status": "ok"})
 
 
 @app.post("/api/generate")
 def generate():
-    payload = request.get_json(silent=True) or {}
-    source = payload.get("source", "workflow")
-    text = payload.get("input", "").strip()
+    text = OPENAPI_FILE.read_text(encoding="utf-8")
 
-    if not text:
-        return jsonify({"error": "input is required"}), 400
+    tests = generate_from_openapi(text)
+    validate_test_cases(tests)
 
-    try:
-        if source == "openapi":
-            tests = generate_from_openapi(text)
-        elif source == "workflow":
-            tests = generate_from_workflow(text)
-        else:
-            return jsonify({"error": "source must be workflow or openapi"}), 400
+    return jsonify({
+        "type": "openapi",
+        "total": len(tests),
+        "tests": tests
+    })
 
-        postman = build_postman_collection(tests)
-        cypress = build_cypress_spec(tests)
 
-        result = {
-            "source": source,
-            "tests": tests,
-            "postman_collection": postman,
-            "cypress_spec": cypress,
-        }
-        (OUTPUT_DIR / "latest-generation.json").write_text(
-            json.dumps(result, indent=2), encoding="utf-8"
-        )
-        (OUTPUT_DIR / "generated.collection.json").write_text(
-            json.dumps(postman, indent=2), encoding="utf-8"
-        )
-        (OUTPUT_DIR / "generated.cy.js").write_text(cypress, encoding="utf-8")
+@app.post("/api/ai-generate")
+def ai_generate():
+    if not AI_TEST_FILE.exists():
+        return jsonify({
+            "error": "AI tests not generated yet. Run generate_ai_tests.py first."
+        }), 404
 
-        return jsonify(result)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+    tests = json.loads(
+        AI_TEST_FILE.read_text(encoding="utf-8")
+    )
+
+    validate_test_cases(tests)
+
+    return jsonify({
+        "type": "ai",
+        "total": len(tests),
+        "tests": tests
+    })
+
+
+@app.post("/api/run")
+def run_tests():
+    text = OPENAPI_FILE.read_text(encoding="utf-8")
+
+    tests = generate_from_openapi(text)
+    validate_test_cases(tests)
+
+    results = [execute_test(test) for test in tests]
+
+    passed = sum(
+        1 for result in results
+        if result["status"] == "PASS"
+    )
+
+    return jsonify({
+        "total": len(results),
+        "passed": passed,
+        "failed": len(results) - passed,
+        "results": results
+    })
+
+
+@app.post("/api/ai-run")
+def ai_run():
+    if not AI_TEST_FILE.exists():
+        return jsonify({
+            "error": "AI tests not generated yet."
+        }), 404
+
+    tests = json.loads(
+        AI_TEST_FILE.read_text(encoding="utf-8")
+    )
+
+    validate_test_cases(tests)
+
+    results = [execute_test(test) for test in tests]
+
+    passed = sum(
+        1 for result in results
+        if result["status"] == "PASS"
+    )
+
+    return jsonify({
+        "type": "ai",
+        "total": len(results),
+        "passed": passed,
+        "failed": len(results) - passed,
+        "results": results
+    })
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)
+    app.run(host="0.0.0.0", port=5002)

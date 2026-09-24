@@ -29,3 +29,17 @@ Terminal 3 :
 Terminal 4 :
 
 python -c "from pathlib import Path; from generator.openapi_generator import generate_from_openapi; import json; print(json.dumps(generate_from_openapi(Path('specs/openapi.yaml').read_text()), indent=2))"
+
+
+Run in cmd :
+
+set GEMINI_API_KEY=AIzaSyBrr02txNL1u3bF7WFPlaUlJkTol4eur_4
+
+--------------------------------------------------------------
+
+Terminal 1 : python sample_api.py
+
+Terminal 2 : python app.py
+
+Terminal 3 : /frontend => npm run dev
+

@@ -9,6 +9,8 @@ __pycache__/
 .environment
 .env
 
+procedure.txt
+
 # Virtual environment
 .venv/
 venv/
